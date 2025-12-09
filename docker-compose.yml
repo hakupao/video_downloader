@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: video-downloader-backend
+    restart: always
+    environment:
+      - AUTH_CODE=${AUTH_CODE:-123456}
+    volumes:
+      - ./downloads:/app/downloads
+
+  frontend:
+    build: ./frontend
+    container_name: video-downloader-frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
