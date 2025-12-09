@@ -7,10 +7,23 @@ DOWNLOAD_DIR = "downloads"
 if not os.path.exists(DOWNLOAD_DIR):
     os.makedirs(DOWNLOAD_DIR)
 
+import re
+
 def get_info(url: str):
+    # Extract URL if text is provided
+    url_match = re.search(r'https?://[^\s]+', url)
+    if url_match:
+        url = url_match.group(0)
+
     ydl_opts = {
         'quiet': True,
         'no_warnings': True,
+        # Simulate a real browser to avoid "Fresh cookies" errors
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+        }
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
@@ -24,6 +37,7 @@ def get_info(url: str):
                 "extractor": info.get('extractor')
             }
         except Exception as e:
+            # If that fails, it might truly need cookies, but let's hope headers fix it.
             raise Exception(f"Failed to fetch info: {str(e)}")
 
 def _parse_formats(info):
@@ -49,6 +63,11 @@ def _parse_formats(info):
     return formats
 
 def download_video(url: str, format_id: str = "best"):
+    # Extract URL if text is provided
+    url_match = re.search(r'https?://[^\s]+', url)
+    if url_match:
+        url = url_match.group(0)
+
     # Generate unique filename
     filename = f"{uuid.uuid4()}"
     
@@ -56,6 +75,9 @@ def download_video(url: str, format_id: str = "best"):
         'format': format_id if format_id != "best" else "bestvideo+bestaudio/best",
         'outtmpl': os.path.join(DOWNLOAD_DIR, f'{filename}.%(ext)s'),
         'quiet': True,
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        }
     }
     
     if format_id == "bestaudio":

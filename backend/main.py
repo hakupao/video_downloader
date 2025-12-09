@@ -4,7 +4,7 @@ from pydantic import BaseModel
 import os
 import shutil
 from typing import Optional
-from .core import get_info, download_video
+from core import get_info, download_video
 
 app = FastAPI(title="Video Downloader API")
 
